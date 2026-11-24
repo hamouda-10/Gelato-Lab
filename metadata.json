@@ -1,0 +1,6 @@
+{
+  "name": "Gelato Lab",
+  "description": "Artisan gelato showcase featuring five small-batch flavours on a rotating marble lazy-susan with individual recipes, specifications, ingredients, and pricing.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

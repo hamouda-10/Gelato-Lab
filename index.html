@@ -1,0 +1,2750 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gelato Lab — Artisan Gelato Atelier</title>
+    <meta
+      name="description"
+      content="Artisan gelato showcase featuring five small-batch flavours on a rotating marble lazy-susan with individual recipes, specifications, ingredients, and pricing."
+    />
+    <meta property="og:title" content="Gelato Lab — Artisan Gelato Atelier" />
+    <meta
+      property="og:description"
+      content="Artisan gelato showcase featuring five small-batch flavours on a rotating marble lazy-susan with individual recipes, specifications, ingredients, and pricing."
+    />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Archivo:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --u: 1px;
+        --hs: 900;
+        --bg: #9C8FD0;
+        --ink: #34284A;
+        --panel-surface: #FAF8F5;
+        --panel-subtle: #F2EEE8;
+      }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: var(--bg);
+        font-family: "Archivo", system-ui, -apple-system, sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        color: var(--ink);
+      }
+
+      button {
+        font-family: inherit;
+        cursor: pointer;
+      }
+
+      button:focus-visible,
+      input:focus-visible,
+      select:focus-visible {
+        outline: 2px solid currentColor;
+        outline-offset: 2px;
+      }
+
+      /* =====================================================================
+         HERO FULL-SCREEN STAGE (EXACT GEOMETRY & DESIGN UNITS)
+         ===================================================================== */
+      .hero {
+        position: fixed;
+        inset: 0;
+        overflow: hidden;
+        opacity: 0;
+        transition: opacity 0.6s ease;
+        user-select: none;
+      }
+
+      .hero.ready {
+        opacity: 1;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .hero {
+          transition: none;
+        }
+      }
+
+      .waves {
+        position: absolute;
+        inset: 0;
+        opacity: 0.5;
+        pointer-events: none;
+        z-index: 1;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='28' viewBox='0 0 120 28'%3E%3Cpath d='M0 14 C 15 4, 30 4, 45 14 S 75 24, 90 14 S 112 6, 120 14' fill='none' stroke='rgba(30,20,50,0.16)' stroke-width='1.1'/%3E%3C/svg%3E");
+        background-repeat: repeat;
+        background-size: calc(120 * var(--u)) calc(28 * var(--u));
+      }
+
+      .stage {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: calc(1440 * var(--u));
+        height: calc(900 * var(--u));
+        transform: translate(-50%, -50%);
+        z-index: 2;
+      }
+
+      body.portrait .stage {
+        width: calc(390 * var(--u));
+        height: calc(var(--hs) * var(--u));
+      }
+
+      .ring-shadow {
+        position: absolute;
+        left: 0;
+        top: 0;
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 1;
+        will-change: transform;
+      }
+
+      .ring {
+        position: absolute;
+        left: 0;
+        top: 0;
+        border-radius: 50%;
+        background-repeat: no-repeat;
+        pointer-events: none;
+        z-index: 2;
+        transform-origin: center center;
+        will-change: transform;
+      }
+
+      .title {
+        position: absolute;
+        left: calc(190 * var(--u));
+        top: calc(632 * var(--u));
+        margin: 0;
+        z-index: 3;
+        font-family: "Dela Gothic One", sans-serif;
+        font-weight: 400;
+        line-height: 1;
+        letter-spacing: -0.01em;
+        white-space: nowrap;
+        color: var(--ink);
+        pointer-events: none;
+      }
+
+      body.portrait .title {
+        left: 50%;
+        transform: translateX(-50%);
+      }
+
+      .coupe-shadow {
+        position: absolute;
+        left: 0;
+        top: 0;
+        border-radius: 50%;
+        background: radial-gradient(
+          circle,
+          rgba(25, 12, 45, 0.3) 0%,
+          rgba(25, 12, 45, 0.14) 48%,
+          transparent 70%
+        );
+        pointer-events: none;
+        transform-origin: center center;
+        will-change: transform;
+      }
+
+      .coupe {
+        position: absolute;
+        left: 0;
+        top: 0;
+        display: block;
+        object-fit: contain;
+        transform-origin: center center;
+        will-change: transform;
+        cursor: pointer;
+        -webkit-user-drag: none;
+      }
+
+      .prop {
+        position: absolute;
+        left: 0;
+        top: 0;
+        background-repeat: no-repeat;
+        pointer-events: none;
+        z-index: 5;
+        transform-origin: center center;
+        filter: drop-shadow(0 calc(6 * var(--u)) calc(8 * var(--u)) rgba(25, 12, 45, 0.22));
+      }
+
+      .eyebrow {
+        position: absolute;
+        left: calc(158 * var(--u));
+        top: calc(455 * var(--u));
+        z-index: 120;
+        display: flex;
+        align-items: center;
+        gap: calc(18 * var(--u));
+        font-weight: 600;
+        font-size: max(9px, calc(15 * var(--u)));
+        letter-spacing: 0.42em;
+        color: var(--ink);
+        white-space: nowrap;
+        line-height: 1;
+      }
+
+      .eyebrow::before,
+      .eyebrow::after {
+        content: "";
+        display: block;
+        width: calc(64 * var(--u));
+        height: calc(1.5 * var(--u));
+        background: currentColor;
+        flex-shrink: 0;
+      }
+
+      .eyebrow::after {
+        margin-left: calc(-6 * var(--u));
+      }
+
+      .flavour {
+        position: absolute;
+        left: calc(190 * var(--u));
+        top: calc(497 * var(--u));
+        margin: 0;
+        z-index: 120;
+        font-weight: 700;
+        font-size: max(11px, calc(21 * var(--u)));
+        line-height: 1.28;
+        letter-spacing: 0.2em;
+        color: var(--ink);
+        text-transform: uppercase;
+        will-change: transform, opacity;
+      }
+
+      .buy {
+        position: absolute;
+        left: calc(190 * var(--u));
+        top: calc(572 * var(--u));
+        width: calc(156 * var(--u));
+        height: calc(50 * var(--u));
+        z-index: 120;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: calc(2 * var(--u)) solid var(--ink);
+        border-radius: calc(8 * var(--u));
+        background: transparent;
+        font-weight: 600;
+        font-size: max(9px, calc(14 * var(--u)));
+        letter-spacing: 0.2em;
+        color: var(--ink);
+        white-space: nowrap;
+        transition: background-color 0.25s ease, color 0.25s ease, transform 0.18s ease;
+      }
+
+      .buy:hover {
+        background-color: var(--ink);
+        color: var(--bg);
+      }
+
+      .buy:active {
+        transform: scale(0.98);
+      }
+
+      /* Right Price & Spec Readout (Synced with Active Flavour) */
+      .spec-teaser {
+        position: absolute;
+        right: calc(194 * var(--u));
+        top: calc(508 * var(--u));
+        z-index: 120;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        text-align: right;
+        color: var(--ink);
+        will-change: transform, opacity;
+      }
+
+      .spec-price-row {
+        display: flex;
+        align-items: baseline;
+        gap: calc(8 * var(--u));
+        font-variant-numeric: tabular-nums;
+      }
+
+      .spec-price {
+        font-weight: 700;
+        font-size: max(13px, calc(24 * var(--u)));
+        letter-spacing: 0.04em;
+        line-height: 1.1;
+      }
+
+      .spec-unit {
+        font-weight: 600;
+        font-size: max(9px, calc(11 * var(--u)));
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        opacity: 0.78;
+      }
+
+      .spec-meta {
+        margin: calc(6 * var(--u)) 0 0;
+        font-weight: 600;
+        font-size: max(9px, calc(11.5 * var(--u)));
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        opacity: 0.85;
+        white-space: nowrap;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .recipe-link {
+        margin-top: calc(18 * var(--u));
+        padding: 0 0 calc(4 * var(--u));
+        border: none;
+        border-bottom: calc(1.5 * var(--u)) solid var(--ink);
+        background: transparent;
+        color: var(--ink);
+        font-weight: 700;
+        font-size: max(9px, calc(12.5 * var(--u)));
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        white-space: nowrap;
+        transition: opacity 0.2s ease, transform 0.2s ease;
+      }
+
+      .recipe-link:hover {
+        opacity: 0.7;
+        transform: translateX(calc(2 * var(--u)));
+      }
+
+      body.portrait .eyebrow {
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: max(9px, calc(12 * var(--u)));
+        gap: calc(12 * var(--u));
+      }
+
+      body.portrait .eyebrow::before,
+      body.portrait .eyebrow::after {
+        width: calc(40 * var(--u));
+      }
+
+      body.portrait .flavour {
+        left: 0;
+        right: 0;
+        text-align: center;
+        font-size: max(11px, calc(17 * var(--u)));
+      }
+
+      body.portrait .buy {
+        left: calc(50% - 144 * var(--u));
+        width: calc(140 * var(--u));
+        height: calc(46 * var(--u));
+        font-size: max(9px, calc(13 * var(--u)));
+      }
+
+      body.portrait .spec-teaser {
+        right: auto;
+        left: calc(50% + 8 * var(--u));
+        align-items: flex-start;
+        text-align: left;
+      }
+
+      body.portrait .spec-price {
+        font-size: max(12px, calc(16 * var(--u)));
+      }
+
+      body.portrait .spec-unit,
+      body.portrait .spec-meta {
+        display: none;
+      }
+
+      body.portrait .recipe-link {
+        margin-top: calc(4 * var(--u));
+        font-size: max(9px, calc(11 * var(--u)));
+        letter-spacing: 0.14em;
+      }
+
+      .vignette {
+        position: absolute;
+        inset: 0;
+        z-index: 150;
+        pointer-events: none;
+        background: radial-gradient(
+          ellipse 75% 70% at 50% 45%,
+          transparent 55%,
+          rgba(20, 10, 40, 0.22) 100%
+        );
+      }
+
+      .nav-btn {
+        position: absolute;
+        top: calc(26 * var(--u));
+        width: calc(60 * var(--u));
+        height: calc(60 * var(--u));
+        border: calc(1.5 * var(--u)) solid color-mix(in srgb, #fff 55%, transparent);
+        border-radius: calc(14 * var(--u));
+        background: transparent;
+        color: #fff;
+        z-index: 160;
+        display: grid;
+        place-items: center;
+        padding: 0;
+        transition: background-color 0.25s ease, transform 0.18s ease;
+      }
+
+      .nav-btn:hover {
+        background: rgba(255, 255, 255, 0.14);
+      }
+
+      .nav-btn:active {
+        transform: scale(0.96);
+      }
+
+      .nav-btn svg {
+        width: calc(24 * var(--u));
+        height: calc(24 * var(--u));
+        display: block;
+      }
+
+      .nav-menu {
+        left: calc(40 * var(--u));
+      }
+
+      .nav-cart {
+        right: calc(40 * var(--u));
+      }
+
+      .cart-count {
+        position: absolute;
+        top: calc(-6 * var(--u));
+        right: calc(-6 * var(--u));
+        min-width: calc(22 * var(--u));
+        height: calc(22 * var(--u));
+        padding: 0 calc(5 * var(--u));
+        border-radius: calc(6 * var(--u));
+        background: #fff;
+        color: #1f172b;
+        font-size: max(10px, calc(11 * var(--u)));
+        font-weight: 700;
+        font-variant-numeric: tabular-nums;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transform: scale(0.75);
+        pointer-events: none;
+        transition: opacity 0.2s ease, transform 0.2s ease;
+      }
+
+      .cart-count.has-items {
+        opacity: 1;
+        transform: scale(1);
+      }
+
+      body.portrait .nav-btn {
+        top: calc(18 * var(--u));
+        width: calc(48 * var(--u));
+        height: calc(48 * var(--u));
+        border-radius: calc(12 * var(--u));
+      }
+
+      body.portrait .nav-btn svg {
+        width: calc(21 * var(--u));
+        height: calc(21 * var(--u));
+      }
+
+      body.portrait .nav-menu {
+        left: calc(18 * var(--u));
+      }
+
+      body.portrait .nav-cart {
+        right: calc(18 * var(--u));
+      }
+
+      /* =====================================================================
+         OVERLAY DRAWERS (FLAVOUR DOSSIER, CATALOG MENU, SHOPPING BAG)
+         ===================================================================== */
+      .overlay-backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 300;
+        background: rgba(18, 12, 28, 0.48);
+        backdrop-filter: blur(6px);
+        -webkit-backdrop-filter: blur(6px);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.26s ease;
+      }
+
+      .overlay-backdrop.open {
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      .drawer {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        z-index: 310;
+        width: min(620px, 100vw);
+        background: var(--panel-surface);
+        color: #1E1728;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 24px 72px rgba(18, 10, 32, 0.34);
+        transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+        pointer-events: auto;
+      }
+
+      .drawer-right {
+        right: 0;
+        transform: translateX(100%);
+      }
+
+      .drawer-left {
+        left: 0;
+        width: min(740px, 100vw);
+        transform: translateX(-100%);
+      }
+
+      .drawer.open {
+        transform: translateX(0);
+      }
+
+      .drawer-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 20px 28px;
+        border-bottom: 1px solid rgba(30, 23, 40, 0.1);
+        flex-shrink: 0;
+      }
+
+      .drawer-kicker {
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        color: rgba(30, 23, 40, 0.62);
+      }
+
+      .drawer-close {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        border: 1px solid rgba(30, 23, 40, 0.16);
+        background: transparent;
+        color: #1E1728;
+        display: grid;
+        place-items: center;
+        transition: background-color 0.18s ease;
+        flex-shrink: 0;
+      }
+
+      .drawer-close:hover {
+        background: rgba(30, 23, 40, 0.06);
+      }
+
+      .drawer-body {
+        flex: 1;
+        overflow-y: auto;
+        padding: 24px 28px 36px;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .drawer-footer {
+        padding: 18px 28px 24px;
+        border-top: 1px solid rgba(30, 23, 40, 0.1);
+        background: var(--panel-surface);
+        flex-shrink: 0;
+      }
+
+      .flavour-tabs {
+        display: flex;
+        gap: 6px;
+        overflow-x: auto;
+        padding: 4px;
+        background: var(--panel-subtle);
+        border-radius: 10px;
+        margin-bottom: 24px;
+      }
+
+      .flavour-tab {
+        flex: 1 0 auto;
+        padding: 9px 12px;
+        border: none;
+        border-radius: 7px;
+        background: transparent;
+        color: rgba(30, 23, 40, 0.68);
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        white-space: nowrap;
+        transition: background-color 0.18s ease, color 0.18s ease;
+      }
+
+      .flavour-tab:hover {
+        color: #1E1728;
+      }
+
+      .flavour-tab.active {
+        background: #FFFFFF;
+        color: var(--ink);
+        box-shadow: 0 1px 4px rgba(20, 12, 35, 0.08);
+      }
+
+      .dossier-top {
+        display: grid;
+        grid-template-columns: 152px 1fr;
+        gap: 24px;
+        align-items: center;
+        padding-bottom: 24px;
+        border-bottom: 1px solid rgba(30, 23, 40, 0.1);
+      }
+
+      .dossier-bowl-wrap {
+        width: 152px;
+        height: 152px;
+        border-radius: 16px;
+        display: grid;
+        place-items: center;
+        padding: 14px;
+        position: relative;
+      }
+
+      .dossier-bowl-wrap img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        filter: drop-shadow(0 10px 14px rgba(25, 12, 45, 0.24));
+      }
+
+      .dossier-origin {
+        font-size: 12px;
+        font-weight: 600;
+        color: rgba(30, 23, 40, 0.62);
+        letter-spacing: 0.04em;
+        margin-bottom: 6px;
+      }
+
+      .dossier-name {
+        margin: 0;
+        font-size: 26px;
+        font-weight: 700;
+        line-height: 1.12;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+        color: var(--ink);
+      }
+
+      .dossier-tagline {
+        margin: 8px 0 12px;
+        font-size: 14px;
+        line-height: 1.5;
+        color: rgba(30, 23, 40, 0.78);
+      }
+
+      .dossier-price-line {
+        display: flex;
+        align-items: baseline;
+        gap: 10px;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .dossier-price-big {
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--ink);
+      }
+
+      .dossier-price-note {
+        font-size: 13px;
+        color: rgba(30, 23, 40, 0.6);
+      }
+
+      .format-group {
+        margin: 22px 0;
+      }
+
+      .section-label {
+        display: block;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: rgba(30, 23, 40, 0.56);
+        margin-bottom: 10px;
+      }
+
+      .format-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+      }
+
+      .format-btn {
+        padding: 12px 10px;
+        border-radius: 10px;
+        border: 1.5px solid rgba(30, 23, 40, 0.14);
+        background: #FFFFFF;
+        color: #1E1728;
+        text-align: left;
+        transition: border-color 0.18s ease, background-color 0.18s ease;
+      }
+
+      .format-btn:hover {
+        border-color: rgba(30, 23, 40, 0.42);
+      }
+
+      .format-btn.selected {
+        border-color: var(--ink);
+        background: var(--ink);
+        color: #FFFFFF;
+      }
+
+      .format-title {
+        display: block;
+        font-size: 13px;
+        font-weight: 700;
+        line-height: 1.25;
+      }
+
+      .format-sub {
+        display: block;
+        font-size: 11px;
+        opacity: 0.74;
+        margin-top: 2px;
+      }
+
+      .format-price {
+        display: block;
+        font-size: 13px;
+        font-weight: 700;
+        margin-top: 6px;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .purchase-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .qty-stepper {
+        display: inline-flex;
+        align-items: center;
+        border: 1.5px solid rgba(30, 23, 40, 0.18);
+        border-radius: 10px;
+        height: 48px;
+        background: #FFFFFF;
+      }
+
+      .qty-btn {
+        width: 40px;
+        height: 100%;
+        border: none;
+        background: transparent;
+        color: #1E1728;
+        font-size: 18px;
+        font-weight: 600;
+        display: grid;
+        place-items: center;
+      }
+
+      .qty-btn:hover {
+        background: rgba(30, 23, 40, 0.05);
+      }
+
+      .qty-val {
+        min-width: 30px;
+        text-align: center;
+        font-size: 14px;
+        font-weight: 700;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .primary-cta {
+        flex: 1;
+        height: 48px;
+        border: none;
+        border-radius: 10px;
+        background: var(--ink);
+        color: #FFFFFF;
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        padding: 0 20px;
+        white-space: nowrap;
+        font-variant-numeric: tabular-nums;
+        transition: opacity 0.2s ease, transform 0.16s ease;
+      }
+
+      .primary-cta:hover {
+        opacity: 0.9;
+      }
+
+      .primary-cta:active {
+        transform: scale(0.99);
+      }
+
+      .dossier-section {
+        padding: 22px 0;
+        border-top: 1px solid rgba(30, 23, 40, 0.1);
+      }
+
+      .dossier-section h3 {
+        margin: 0 0 12px;
+        font-size: 15px;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--ink);
+      }
+
+      .scoops-list {
+        list-style: none;
+        margin: 0 0 16px;
+        padding: 0;
+        display: grid;
+        gap: 10px;
+      }
+
+      .scoops-list li {
+        display: grid;
+        grid-template-columns: 28px 1fr;
+        gap: 10px;
+        font-size: 14px;
+        line-height: 1.5;
+        color: rgba(30, 23, 40, 0.88);
+      }
+
+      .scoop-num {
+        font-weight: 700;
+        font-size: 12px;
+        color: rgba(30, 23, 40, 0.48);
+        padding-top: 2px;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .ingredients-prose {
+        margin: 0;
+        font-size: 14px;
+        line-height: 1.65;
+        color: rgba(30, 23, 40, 0.82);
+      }
+
+      .dietary-line {
+        margin: 12px 0 0;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--ink);
+        line-height: 1.5;
+      }
+
+      .vessel-note {
+        margin: 8px 0 0;
+        font-size: 13px;
+        color: rgba(30, 23, 40, 0.66);
+      }
+
+      .specs-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        border-top: 1px solid rgba(30, 23, 40, 0.1);
+      }
+
+      .spec-cell {
+        padding: 12px 0;
+        border-bottom: 1px solid rgba(30, 23, 40, 0.08);
+      }
+
+      .spec-cell:nth-child(odd) {
+        padding-right: 16px;
+      }
+
+      .spec-cell:nth-child(even) {
+        padding-left: 16px;
+        border-left: 1px solid rgba(30, 23, 40, 0.08);
+      }
+
+      .spec-k {
+        display: block;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: rgba(30, 23, 40, 0.54);
+        margin-bottom: 4px;
+      }
+
+      .spec-v {
+        display: block;
+        font-size: 14px;
+        font-weight: 700;
+        color: #1E1728;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .recipe-steps {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: grid;
+        gap: 16px;
+      }
+
+      .recipe-step {
+        display: grid;
+        grid-template-columns: 34px 1fr;
+        gap: 12px;
+      }
+
+      .step-index {
+        font-size: 13px;
+        font-weight: 700;
+        color: rgba(30, 23, 40, 0.46);
+        font-variant-numeric: tabular-nums;
+        padding-top: 1px;
+      }
+
+      .step-title {
+        font-size: 14px;
+        font-weight: 700;
+        color: #1E1728;
+        margin: 0 0 4px;
+      }
+
+      .step-desc {
+        font-size: 13.5px;
+        line-height: 1.6;
+        color: rgba(30, 23, 40, 0.78);
+        margin: 0;
+      }
+
+      .menu-intro {
+        margin: 0 0 20px;
+        font-size: 14px;
+        line-height: 1.6;
+        color: rgba(30, 23, 40, 0.72);
+      }
+
+      .catalog-list {
+        display: grid;
+        gap: 0;
+        border-top: 1px solid rgba(30, 23, 40, 0.1);
+      }
+
+      .catalog-row {
+        display: grid;
+        grid-template-columns: 88px 1fr auto;
+        gap: 18px;
+        align-items: center;
+        padding: 18px 0;
+        border-bottom: 1px solid rgba(30, 23, 40, 0.1);
+      }
+
+      .catalog-thumb {
+        width: 88px;
+        height: 88px;
+        border-radius: 14px;
+        display: grid;
+        place-items: center;
+        padding: 10px;
+      }
+
+      .catalog-thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        filter: drop-shadow(0 6px 8px rgba(25, 12, 45, 0.2));
+      }
+
+      .catalog-name {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: #1E1728;
+      }
+
+      .catalog-desc {
+        margin: 4px 0 6px;
+        font-size: 13px;
+        line-height: 1.45;
+        color: rgba(30, 23, 40, 0.76);
+      }
+
+      .catalog-meta {
+        font-size: 12px;
+        font-weight: 600;
+        color: rgba(30, 23, 40, 0.56);
+        font-variant-numeric: tabular-nums;
+      }
+
+      .catalog-actions {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 8px;
+      }
+
+      .catalog-price {
+        font-size: 17px;
+        font-weight: 700;
+        font-variant-numeric: tabular-nums;
+        color: #1E1728;
+      }
+
+      .catalog-btns {
+        display: flex;
+        gap: 8px;
+      }
+
+      .btn-outline-sm {
+        height: 36px;
+        padding: 0 12px;
+        border-radius: 8px;
+        border: 1.5px solid rgba(30, 23, 40, 0.24);
+        background: transparent;
+        color: #1E1728;
+        font-size: 11.5px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        white-space: nowrap;
+        transition: background-color 0.18s ease, border-color 0.18s ease;
+      }
+
+      .btn-outline-sm:hover {
+        border-color: #1E1728;
+        background: rgba(30, 23, 40, 0.05);
+      }
+
+      .btn-solid-sm {
+        height: 36px;
+        padding: 0 14px;
+        border-radius: 8px;
+        border: none;
+        background: #1E1728;
+        color: #FFFFFF;
+        font-size: 11.5px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        white-space: nowrap;
+        transition: opacity 0.18s ease;
+      }
+
+      .btn-solid-sm:hover {
+        opacity: 0.88;
+      }
+
+      .compare-wrap {
+        margin-top: 28px;
+      }
+
+      .compare-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 12.5px;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .compare-table th {
+        text-align: left;
+        padding: 10px 8px 10px 0;
+        font-size: 10.5px;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: rgba(30, 23, 40, 0.56);
+        border-bottom: 1.5px solid rgba(30, 23, 40, 0.14);
+        white-space: nowrap;
+      }
+
+      .compare-table td {
+        padding: 11px 8px 11px 0;
+        border-bottom: 1px solid rgba(30, 23, 40, 0.08);
+        color: #1E1728;
+      }
+
+      .compare-table td:first-child {
+        font-weight: 700;
+      }
+
+      .cart-empty {
+        padding: 48px 0;
+        text-align: center;
+      }
+
+      .cart-empty h3 {
+        margin: 0 0 8px;
+        font-size: 18px;
+        font-weight: 700;
+      }
+
+      .cart-empty p {
+        margin: 0 0 22px;
+        font-size: 14px;
+        color: rgba(30, 23, 40, 0.66);
+      }
+
+      .cart-items {
+        display: grid;
+        border-top: 1px solid rgba(30, 23, 40, 0.1);
+      }
+
+      .cart-item {
+        display: grid;
+        grid-template-columns: 64px 1fr auto;
+        gap: 14px;
+        align-items: center;
+        padding: 16px 0;
+        border-bottom: 1px solid rgba(30, 23, 40, 0.1);
+      }
+
+      .cart-item-img {
+        width: 64px;
+        height: 64px;
+        border-radius: 10px;
+        padding: 7px;
+        display: grid;
+        place-items: center;
+      }
+
+      .cart-item-img img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+      }
+
+      .cart-item-title {
+        font-size: 14px;
+        font-weight: 700;
+        text-transform: uppercase;
+        margin: 0 0 3px;
+      }
+
+      .cart-item-sub {
+        font-size: 12.5px;
+        color: rgba(30, 23, 40, 0.64);
+        margin: 0 0 8px;
+      }
+
+      .cart-item-controls {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .mini-stepper {
+        display: inline-flex;
+        align-items: center;
+        border: 1px solid rgba(30, 23, 40, 0.2);
+        border-radius: 7px;
+        height: 30px;
+        background: #FFFFFF;
+      }
+
+      .mini-stepper button {
+        width: 28px;
+        height: 100%;
+        border: none;
+        background: transparent;
+        font-weight: 700;
+        color: #1E1728;
+      }
+
+      .mini-stepper span {
+        min-width: 22px;
+        text-align: center;
+        font-size: 12.5px;
+        font-weight: 700;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .remove-link {
+        border: none;
+        background: transparent;
+        padding: 0;
+        font-size: 12px;
+        font-weight: 600;
+        color: rgba(30, 23, 40, 0.56);
+        text-decoration: underline;
+      }
+
+      .remove-link:hover {
+        color: #1E1728;
+      }
+
+      .cart-item-price {
+        font-size: 15px;
+        font-weight: 700;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .summary-lines {
+        display: grid;
+        gap: 8px;
+        margin-bottom: 16px;
+        font-size: 13.5px;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .summary-row {
+        display: flex;
+        justify-content: space-between;
+        color: rgba(30, 23, 40, 0.74);
+      }
+
+      .summary-total {
+        display: flex;
+        justify-content: space-between;
+        padding-top: 10px;
+        border-top: 1px solid rgba(30, 23, 40, 0.12);
+        font-size: 16px;
+        font-weight: 700;
+        color: #1E1728;
+      }
+
+      .checkout-form {
+        display: grid;
+        gap: 14px;
+        margin-top: 18px;
+        padding-top: 18px;
+        border-top: 1px solid rgba(30, 23, 40, 0.1);
+      }
+
+      .field label {
+        display: block;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: rgba(30, 23, 40, 0.62);
+        margin-bottom: 6px;
+      }
+
+      .field input,
+      .field select {
+        width: 100%;
+        height: 42px;
+        padding: 0 12px;
+        border-radius: 8px;
+        border: 1.5px solid rgba(30, 23, 40, 0.18);
+        background: #FFFFFF;
+        color: #1E1728;
+        font-family: inherit;
+        font-size: 14px;
+      }
+
+      .order-confirmed {
+        padding: 28px 0;
+      }
+
+      .order-confirmed h3 {
+        margin: 0 0 8px;
+        font-size: 22px;
+        font-weight: 700;
+      }
+
+      .order-confirmed p {
+        margin: 0 0 16px;
+        font-size: 14px;
+        line-height: 1.6;
+        color: rgba(30, 23, 40, 0.78);
+      }
+
+      .toast {
+        position: fixed;
+        left: 50%;
+        bottom: 24px;
+        z-index: 400;
+        transform: translate(-50%, 16px);
+        opacity: 0;
+        pointer-events: none;
+        background: #1E1728;
+        color: #FFFFFF;
+        padding: 12px 20px;
+        border-radius: 10px;
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        box-shadow: 0 12px 32px rgba(15, 8, 28, 0.28);
+        transition: opacity 0.22s ease, transform 0.22s ease;
+        white-space: nowrap;
+      }
+
+      .toast.show {
+        opacity: 1;
+        transform: translate(-50%, 0);
+      }
+
+      @media (max-width: 600px) {
+        .drawer-header,
+        .drawer-body,
+        .drawer-footer {
+          padding-left: 18px;
+          padding-right: 18px;
+        }
+
+        .dossier-top {
+          grid-template-columns: 1fr;
+          text-align: left;
+        }
+
+        .dossier-bowl-wrap {
+          width: 124px;
+          height: 124px;
+        }
+
+        .format-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .specs-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .spec-cell:nth-child(even) {
+          padding-left: 0;
+          border-left: none;
+        }
+
+        .catalog-row {
+          grid-template-columns: 72px 1fr;
+        }
+
+        .catalog-actions {
+          grid-column: 1 / -1;
+          flex-direction: row;
+          justify-content: space-between;
+          align-items: center;
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="hero" id="hero" aria-label="Gelato Lab">
+      <div class="waves"></div>
+
+      <div class="stage" id="stage">
+        <div class="ring-shadow" id="ringShadow"></div>
+        <div class="ring" id="ring"></div>
+        <h1 class="title" id="title">GELATO LAB</h1>
+        <div class="eyebrow" id="eyebrow">ARTISAN</div>
+        <p class="flavour" id="flavour">BERRY /<br />ROSE</p>
+        <button class="buy" id="buyBtn" type="button">BUY NOW</button>
+
+        <div class="spec-teaser" id="specTeaser">
+          <div class="spec-price-row">
+            <span class="spec-price" id="heroPrice">$15.50</span>
+            <span class="spec-unit" id="heroUnit">500 ML PINT</span>
+          </div>
+          <p class="spec-meta" id="heroMeta">7.8% FAT · 18% OVERRUN · EGG-FREE</p>
+          <button class="recipe-link" id="recipeBtn" type="button">RECIPE &amp; SPECS →</button>
+        </div>
+      </div>
+
+      <div class="vignette"></div>
+
+      <button class="nav-btn nav-menu" id="menuBtn" type="button" aria-label="Open menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+          <path d="M4 7h16M4 12h16M4 17h16" />
+        </svg>
+      </button>
+
+      <button class="nav-btn nav-cart" id="cartBtn" type="button" aria-label="Cart">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.7"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M3 4h2.2l2.1 10.2a1.6 1.6 0 0 0 1.6 1.3h7.9a1.6 1.6 0 0 0 1.6-1.2L20 8H6.2" />
+          <circle cx="9.5" cy="19.5" r="1.3" />
+          <circle cx="17" cy="19.5" r="1.3" />
+        </svg>
+        <span class="cart-count" id="cartCount" aria-live="polite">0</span>
+      </button>
+    </main>
+
+    <div class="overlay-backdrop" id="backdrop" aria-hidden="true"></div>
+
+    <aside
+      class="drawer drawer-right"
+      id="dossierDrawer"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="dossierTitle"
+      aria-hidden="true"
+    >
+      <div class="drawer-header">
+        <span class="drawer-kicker" id="dossierKicker">FLAVOUR DOSSIER · RECIPE &amp; SPECS</span>
+        <button class="drawer-close" id="closeDossier" type="button" aria-label="Close flavour details">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M6 6l12 12M18 6L6 18" />
+          </svg>
+        </button>
+      </div>
+      <div class="drawer-body" id="dossierBody"></div>
+    </aside>
+
+    <aside
+      class="drawer drawer-left"
+      id="menuDrawer"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="menuHeading"
+      aria-hidden="true"
+    >
+      <div class="drawer-header">
+        <span class="drawer-kicker" id="menuHeading">GELATO LAB · FULL ARTISAN MENU</span>
+        <button class="drawer-close" id="closeMenu" type="button" aria-label="Close menu">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M6 6l12 12M18 6L6 18" />
+          </svg>
+        </button>
+      </div>
+      <div class="drawer-body" id="menuBody"></div>
+    </aside>
+
+    <aside
+      class="drawer drawer-right"
+      id="cartDrawer"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="cartHeading"
+      aria-hidden="true"
+    >
+      <div class="drawer-header">
+        <span class="drawer-kicker" id="cartHeading">YOUR INSULATED BAG</span>
+        <button class="drawer-close" id="closeCart" type="button" aria-label="Close shopping bag">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M6 6l12 12M18 6L6 18" />
+          </svg>
+        </button>
+      </div>
+      <div class="drawer-body" id="cartBody"></div>
+      <div class="drawer-footer" id="cartFooter"></div>
+    </aside>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <script>
+      (function () {
+        "use strict";
+
+        const RING_URL =
+          "https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20261123_061250_28696685-24a2-408e-8365-47c9b892d5cc.png&w=1024&q=90";
+        const PROPS_URL =
+          "https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20261123_061331_a11a52ac-d35b-4489-afdc-0e3d97464d02.png&w=1024&q=90";
+
+        const COUPE_FILL = 0.985;
+        const RING_OUTER = 462.5;
+        const RING_INNER = 354;
+        const RING_CX_IMG = 507.5;
+        const RING_CY_IMG = 502.5;
+        const BAND = (RING_OUTER + RING_INNER) / 2 / RING_OUTER;
+        const STEP_DEG = 72;
+
+        const PROP_BOXES = {
+          cone: [100, 63, 249, 276],
+          rasp: [405, 214, 137, 132],
+          blue: [691, 130, 186, 160],
+          spoonL: [127, 381, 234, 211],
+          spoonR: [658, 380, 233, 218],
+        };
+
+        const FLAVOURS = [
+          {
+            id: "berry-rose",
+            name: "BERRY /<br>ROSE",
+            plainName: "Berry / Rose",
+            shortTab: "Berry / Rose",
+            bg: "#9C8FD0",
+            ink: "#34284A",
+            url: "https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20261123_062631_ec34a231-9141-457a-afd9-637effe7ec03.png&w=1400&q=90",
+            origin: "Batch No. 014 · Piedmont Raspberry & Damask Rose",
+            tagline: "Bright berry sorbetto layered beside cold-steeped Damask rose petal cream and tart Burgundy cassis.",
+            heroMeta: "7.8% FAT · 18% OVERRUN · EGG-FREE",
+            vessel: "Served in glossy ivory porcelain with a hand-painted gold rim.",
+            formats: [
+              { id: "coupe", label: "Single Coupe", size: "140 g · 3 scoops", price: 7.5 },
+              { id: "pint", label: "Artisan Pint", size: "500 ml · 445 g", price: 15.5 },
+              { id: "flight", label: "Tasting Trio", size: "3 × 140 g", price: 19.5 },
+            ],
+            scoops: [
+              "Wild Raspberry Gelato finished with crisp freeze-dried raspberry crumble.",
+              "Dusty Damask Rose Cream infused cold and crowned with edible dried rose petals.",
+              "Tart Blackcurrant (Cassis) Sorbetto topped with a fresh raspberry and two wild blueberries.",
+            ],
+            ingredients:
+              "Organic Piedmont raspberries (28%), pasture-raised whole milk (24%), heavy sweet cream (14%), raw organic cane sugar, Burgundy blackcurrant purée (11%), steam-distilled Rosa Damascena floral water (1.4%), freeze-dried raspberry shards, fresh blueberries, organic rose petals, Sicilian lemon juice, natural locust bean gum.",
+            dietary: "Contains Dairy · Gluten-Free · Egg-Free · Nut-Free · Vegetarian",
+            specs: [
+              { k: "Net Weight (Pint)", v: "500 ml / 445 g" },
+              { k: "Butterfat Content", v: "7.8% (Hybrid Crema)" },
+              { k: "Overrun (Air)", v: "18% Slow Churn" },
+              { k: "Serving Temp", v: "-12.0 °C (10 °F)" },
+              { k: "Energy / 100 g", v: "174 kcal · 18 g Sugar" },
+              { k: "Protein / 100 g", v: "2.6 g" },
+            ],
+            recipe: [
+              {
+                title: "Cold Berry Maceration (12 Hours)",
+                desc: "Whole Piedmont raspberries and blackcurrants are cold-macerated overnight with raw cane sugar and fresh lemon juice to preserve vivid acidity and aroma without cooking the fruit.",
+              },
+              {
+                title: "Floral Cream Pasteurization (85 °C)",
+                desc: "Pasture milk and heavy cream are heated to 85 °C, flash-chilled to 4 °C, and cold-steeped with steam-distilled Damask rose water so the petals remain delicate and never soapy.",
+              },
+              {
+                title: "Low-RPM Horizontal Churn (-9 °C)",
+                desc: "Each base is spun separately in a batch freezer to cap air incorporation at 18%, then hardened in a -35 °C blast chiller to lock in microscopic ice crystals.",
+              },
+              {
+                title: "Hand-Spaded Porcelain Finish",
+                desc: "Three contrasting scoops are spaded into chilled ivory porcelain and garnished immediately with freeze-dried raspberry crumble, organic rose petals, and fresh berries.",
+              },
+            ],
+          },
+          {
+            id: "pistachio-cream",
+            name: "PISTACHIO /<br>CREAM",
+            plainName: "Pistachio / Cream",
+            shortTab: "Pistachio",
+            bg: "#E8A0B4",
+            ink: "#4A1F33",
+            url: "https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20261123_062744_ac87ceec-2040-4078-80fd-6b6bf016f675.png&w=1400&q=90",
+            origin: "Batch No. 021 · Bronte DOP & Madagascar Vanilla",
+            tagline: "Stone-milled Sicilian Bronte pistachio paired with split Bourbon vanilla bean and Belgian white chocolate.",
+            heroMeta: "11.4% FAT · 15% OVERRUN · BRONTE DOP",
+            vessel: "Served in glossy deep burgundy stoneware with a thin gold rim.",
+            formats: [
+              { id: "coupe", label: "Single Coupe", size: "140 g · 3 scoops", price: 8.9 },
+              { id: "pint", label: "Artisan Pint", size: "500 ml · 470 g", price: 17.9 },
+              { id: "flight", label: "Tasting Trio", size: "3 × 140 g", price: 22.5 },
+            ],
+            scoops: [
+              "Roasted Bronte DOP Green Pistachio studded with crunchy toasted pistachio kernels.",
+              "Madagascar & Tahitian Vanilla Bean Fior di Latte speckled with real pod seeds.",
+              "Sweet Meadow Cream folded with crisp hand-shaved Belgian white chocolate curls.",
+            ],
+            ingredients:
+              "Roasted Bronte DOP green pistachios (22%), pasture-raised whole milk (36%), heavy sweet cream (18%), inverted cane sugar, non-fat milk solids, Belgian 32% cocoa-butter white chocolate shavings (7%), whole Madagascar Bourbon vanilla pods, Trapani sea salt, natural carob seed gum.",
+            dietary: "Contains Dairy, Tree Nuts (Pistachio), Soy · Gluten-Free · Egg-Free",
+            specs: [
+              { k: "Net Weight (Pint)", v: "500 ml / 470 g" },
+              { k: "Butterfat Content", v: "11.4% (Nut & Crema)" },
+              { k: "Overrun (Air)", v: "15% Ultra-Dense" },
+              { k: "Serving Temp", v: "-13.0 °C (8.5 °F)" },
+              { k: "Energy / 100 g", v: "248 kcal · 17 g Sugar" },
+              { k: "Nut Roast Profile", v: "145 °C Light-Medium" },
+            ],
+            recipe: [
+              {
+                title: "Stone-Milled Bronte Paste (6 Hours)",
+                desc: "Volcanic-soil Sicilian pistachios are toasted gently at 145 °C, blanched to lift skins, and stone-ground with Trapani sea salt into a pure emerald paste with zero artificial colouring.",
+              },
+              {
+                title: "Overnight Vanilla Pod Aging (18 Hours)",
+                desc: "Split Bourbon vanilla pods are steeped in warm fior di latte base and matured at 3 °C overnight so milk proteins hydrate fully and absorb floral vanillin notes.",
+              },
+              {
+                title: "Precision Lipid Emulsion Churn",
+                desc: "Warm pistachio paste is homogenized into the chilled cream base moments before batch freezing to keep natural nut oils velvety and cohesive on the spoon.",
+              },
+              {
+                title: "Cold White Chocolate Shaving",
+                desc: "Tempered Belgian white chocolate blocks are shaved cold directly over the cream scoop and finished with toasted chopped green pistachios.",
+              },
+            ],
+          },
+          {
+            id: "mango-passion",
+            name: "MANGO /<br>PASSION",
+            plainName: "Mango / Passion",
+            shortTab: "Mango",
+            bg: "#F5D4BA",
+            ink: "#5A3216",
+            url: "https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20261123_062753_b99d867d-9f15-4cde-a4b0-08e68fe96931.png&w=1400&q=90",
+            origin: "Batch No. 037 · Ratnagiri Alphonso & Orchard Peach",
+            tagline: "100% plant-based tropical sorbetto crafted from tree-ripened Alphonso mango, white peach, and tangy passion fruit.",
+            heroMeta: "0.0% FAT · 74% REAL FRUIT · VEGAN",
+            vessel: "Served in glossy cobalt blue ceramic glaze with a gold rim.",
+            formats: [
+              { id: "coupe", label: "Single Coupe", size: "140 g · 3 scoops", price: 6.9 },
+              { id: "pint", label: "Artisan Pint", size: "500 ml · 455 g", price: 14.2 },
+              { id: "flight", label: "Tasting Trio", size: "3 × 140 g", price: 18.0 },
+            ],
+            scoops: [
+              "Saffron-Gold Alphonso Mango Sorbetto topped with fresh hand-diced mango cubes.",
+              "Velvety Orchard Peach Sorbetto garnished with a chilled fresh peach crescent.",
+              "Vibrant Ecuadorian Passion Fruit Sorbetto ribboned with crisp passion fruit seeds.",
+            ],
+            ingredients:
+              "Ratnagiri Alphonso mango purée (38%), sun-ripened yellow and white peach purée (22%), Ecuadorian passion fruit juice and seed pulp (14%), filtered alpine water, organic cane sugar, plant dextrose, cold-pressed lime juice, fresh mango cubes, fresh peach slice, citrus pectin, chicory root fiber.",
+            dietary: "100% Plant-Based (Vegan) · Dairy-Free · Gluten-Free · Nut-Free",
+            specs: [
+              { k: "Net Weight (Pint)", v: "500 ml / 455 g" },
+              { k: "Butterfat Content", v: "0.0% (Pure Sorbetto)" },
+              { k: "Overrun (Air)", v: "16% Silky Fruit Body" },
+              { k: "Serving Temp", v: "-11.0 °C (12 °F)" },
+              { k: "Energy / 100 g", v: "138 kcal · 22 g Sugar" },
+              { k: "Whole Fruit Ratio", v: "74% by Weight" },
+            ],
+            recipe: [
+              {
+                title: "Cold-Pressed Fruit Extraction",
+                desc: "Tree-ripened Alphonso mangoes and stone peaches are peeled and puréed completely cold—never boiled—locking in bright tropical aromatics and natural saffron hue.",
+              },
+              {
+                title: "28° Brix Refractometer Calibration",
+                desc: "Organic cane sugar and plant dextrose are dissolved into alpine water, chilled to 4 °C, and calibrated to exactly 28° Brix for creamy, non-icy scoopability without dairy.",
+              },
+              {
+                title: "Rapid Brine-Jacket Freeze",
+                desc: "The high-fruit purées are frozen rapidly against -28 °C cylinder walls to prevent coarse ice crystal formation while keeping overrun tight at 16%.",
+              },
+              {
+                title: "Fresh Tropical Garnish",
+                desc: "Scooped into glossy cobalt ceramic and finished with chilled mango cubes, a razor-thin peach slice, and spooned passion fruit seeds.",
+              },
+            ],
+          },
+          {
+            id: "dark-choc-hazelnut",
+            name: "DARK CHOC /<br>HAZELNUT",
+            plainName: "Dark Choc / Hazelnut",
+            shortTab: "Dark Choc",
+            bg: "#C49A9A",
+            ink: "#3B2222",
+            url: "https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20261123_062803_7758f16c-7b82-4eb3-9c3e-aca45f2feda3.png&w=1400&q=90",
+            origin: "Batch No. 042 · Ecuador Arriba 72% & Piedmont IGP",
+            tagline: "Single-origin 72% dark chocolate ganache paired with roasted Tonda Gentile hazelnut and cold-steeped espresso.",
+            heroMeta: "12.6% FAT · 14% OVERRUN · 72% CACAO",
+            vessel: "Served in matte sage-green stoneware with a brushed gold rim.",
+            formats: [
+              { id: "coupe", label: "Single Coupe", size: "140 g · 3 scoops", price: 8.2 },
+              { id: "pint", label: "Artisan Pint", size: "500 ml · 480 g", price: 16.8 },
+              { id: "flight", label: "Tasting Trio", size: "3 × 140 g", price: 21.0 },
+            ],
+            scoops: [
+              "72% Single-Origin Dark Chocolate Truffle Gelato topped with crisp dark chocolate shavings.",
+              "Piedmont IGP Roasted Hazelnut Gianduja finished with caramelized chopped hazelnuts.",
+              "Cold-Brewed Arabica Espresso Crema crowned with three whole roasted coffee beans.",
+            ],
+            ingredients:
+              "Pasture-raised whole milk (32%), 72% Ecuadorian Arriba Nacional dark chocolate couverture (16%), roasted Piedmont Tonda Gentile hazelnut paste (13%), heavy sweet cream (12%), raw cane sugar, Dutch-processed alkalized cocoa powder, Ethiopian cold-brew espresso extraction (6%), toasted hazelnut nibs, whole espresso beans, fleur de sel.",
+            dietary: "Contains Dairy, Tree Nuts (Hazelnut) · Gluten-Free · Egg-Free · 28 mg Caffeine",
+            specs: [
+              { k: "Net Weight (Pint)", v: "500 ml / 480 g" },
+              { k: "Butterfat Content", v: "12.6% (Cacao & Cream)" },
+              { k: "Overrun (Air)", v: "14% Truffle Density" },
+              { k: "Serving Temp", v: "-13.0 °C (8.5 °F)" },
+              { k: "Energy / 100 g", v: "264 kcal · 19 g Sugar" },
+              { k: "Cacao Solids", v: "72% Single-Origin" },
+            ],
+            recipe: [
+              {
+                title: "High-Shear Ganache Emulsion (70 °C)",
+                desc: "Finely chopped 72% Arriba dark chocolate is melted directly into scalded milk and Dutch cocoa using a high-shear immersion mill for a glossy, truffle-rich structure.",
+              },
+              {
+                title: "Amber Hazelnut Gianduja Refining",
+                desc: "Piedmont Tonda Gentile hazelnuts are roasted at 160 °C until deeply fragrant, refined into warm praline butter, and emulsified with a pinch of fleur de sel.",
+              },
+              {
+                title: "16-Hour Cold Espresso Milk Infusion",
+                desc: "Coarsely cracked Ethiopian Arabica beans steep overnight directly in cold sweet milk, extracting rounded mocha sweetness with zero harsh acidity.",
+              },
+              {
+                title: "Barista Stoneware Plating",
+                desc: "Presented in matte sage stoneware and topped with dark chocolate curls, roasted hazelnut crunch, and three whole espresso beans.",
+              },
+            ],
+          },
+          {
+            id: "blueberry-lavender",
+            name: "BLUEBERRY /<br>LAVENDER",
+            plainName: "Blueberry / Lavender",
+            shortTab: "Blueberry",
+            bg: "#EBD98A",
+            ink: "#2D2F63",
+            url: "https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20261123_062812_b00d1221-9fcc-425e-9c6e-a51ed94ea059.png&w=1400&q=90",
+            origin: "Batch No. 058 · Wild Bilberry & Haute-Provence Lavender",
+            tagline: "Mountain blueberry compote swirled alongside precision-steeped Provence lavender and pale lilac honey cream.",
+            heroMeta: "9.2% FAT · 17% OVERRUN · WILD HONEY",
+            vessel: "Served in glossy terracotta ceramic glaze with a gold rim.",
+            formats: [
+              { id: "coupe", label: "Single Coupe", size: "140 g · 3 scoops", price: 7.8 },
+              { id: "pint", label: "Artisan Pint", size: "500 ml · 450 g", price: 15.9 },
+              { id: "flight", label: "Tasting Trio", size: "3 × 140 g", price: 20.2 },
+            ],
+            scoops: [
+              "Wild Mountain Blueberry Gelato studded with plump fresh organic blueberries.",
+              "Haute-Provence Culinary Lavender Cream dusted with dried edible lavender buds.",
+              "Pale Lilac Wildflower Honey Milk Gelato tinted naturally with butterfly pea blossom.",
+            ],
+            ingredients:
+              "Pasture-raised whole milk (34%), wild mountain blueberries (21%), heavy sweet cream (15%), Provence wildflower honey (6%), raw organic cane sugar, culinary Lavandula angustifolia blossoms (0.4%), fresh whole blueberries, natural butterfly pea flower extract, organic lemon juice, guar and carob seed gum.",
+            dietary: "Contains Dairy · Gluten-Free · Egg-Free · Nut-Free · Vegetarian",
+            specs: [
+              { k: "Net Weight (Pint)", v: "500 ml / 450 g" },
+              { k: "Butterfat Content", v: "9.2% (Meadow Crema)" },
+              { k: "Overrun (Air)", v: "17% Custardy Finish" },
+              { k: "Serving Temp", v: "-12.5 °C (9.5 °F)" },
+              { k: "Energy / 100 g", v: "192 kcal · 18 g Sugar" },
+              { k: "Botanical Steep", v: "42 min at 62 °C" },
+            ],
+            recipe: [
+              {
+                title: "Timed Lavender Steep (42 Minutes)",
+                desc: "Culinary Haute-Provence lavender buds steep in 62 °C honey-sweetened milk for exactly 42 minutes, then pass through fine muslin to capture alpine aroma without camphor bitterness.",
+              },
+              {
+                title: "Short Wild Blueberry Reduction",
+                desc: "Wild mountain blueberries are simmered briefly for 9 minutes with wildflower honey and lemon zest to concentrate deep indigo colour and jammy berry notes.",
+              },
+              {
+                title: "Natural Lilac Coloring & Aging",
+                desc: "A gentle botanical infusion of butterfly pea blossom lends the third scoop its pale lilac shade naturally—free of synthetic dyes—before a 12-hour cold maturation.",
+              },
+              {
+                title: "Terracotta Botanical Garnish",
+                desc: "Spaded into warm terracotta porcelain and finished with chilled fresh blueberries and aromatic dried lavender buds.",
+              },
+            ],
+          },
+        ];
+
+        const heroEl = document.getElementById("hero");
+        const stageEl = document.getElementById("stage");
+        const ringEl = document.getElementById("ring");
+        const ringShadowEl = document.getElementById("ringShadow");
+        const titleEl = document.getElementById("title");
+        const eyebrowEl = document.getElementById("eyebrow");
+        const flavourEl = document.getElementById("flavour");
+        const buyBtn = document.getElementById("buyBtn");
+        const specTeaserEl = document.getElementById("specTeaser");
+        const heroPriceEl = document.getElementById("heroPrice");
+        const heroUnitEl = document.getElementById("heroUnit");
+        const heroMetaEl = document.getElementById("heroMeta");
+        const recipeBtn = document.getElementById("recipeBtn");
+        const menuBtn = document.getElementById("menuBtn");
+        const cartBtn = document.getElementById("cartBtn");
+        const cartCountEl = document.getElementById("cartCount");
+
+        const backdropEl = document.getElementById("backdrop");
+        const dossierDrawer = document.getElementById("dossierDrawer");
+        const dossierBody = document.getElementById("dossierBody");
+        const closeDossierBtn = document.getElementById("closeDossier");
+        const menuDrawer = document.getElementById("menuDrawer");
+        const menuBody = document.getElementById("menuBody");
+        const closeMenuBtn = document.getElementById("closeMenu");
+        const cartDrawer = document.getElementById("cartDrawer");
+        const cartBody = document.getElementById("cartBody");
+        const cartFooter = document.getElementById("cartFooter");
+        const closeCartBtn = document.getElementById("closeCart");
+        const toastEl = document.getElementById("toast");
+
+        function hexToRgb(hex) {
+          const clean = hex.replace("#", "");
+          const n = parseInt(clean, 16);
+          return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+        }
+
+        function lerpColor(rgbA, rgbB, t) {
+          const r = Math.round(rgbA[0] + (rgbB[0] - rgbA[0]) * t);
+          const g = Math.round(rgbA[1] + (rgbB[1] - rgbA[1]) * t);
+          const b = Math.round(rgbA[2] + (rgbB[2] - rgbA[2]) * t);
+          return `rgb(${r}, ${g}, ${b})`;
+        }
+
+        const FLAVOUR_RGB = FLAVOURS.map((f) => ({
+          bg: hexToRgb(f.bg),
+          ink: hexToRgb(f.ink),
+        }));
+
+        const easeInOut = (function makeBezier(x1, y1, x2, y2) {
+          const cx = 3 * x1;
+          const bx = 3 * (x2 - x1) - cx;
+          const ax = 1 - cx - bx;
+          const cy = 3 * y1;
+          const by = 3 * (y2 - y1) - cy;
+          const ay = 1 - cy - by;
+
+          const sampleX = (t) => ((ax * t + bx) * t + cx) * t;
+          const sampleY = (t) => ((ay * t + by) * t + cy) * t;
+          const sampleDX = (t) => (3 * ax * t + 2 * bx) * t + cx;
+
+          return function solve(x) {
+            if (x <= 0) return 0;
+            if (x >= 1) return 1;
+            let t = x;
+            for (let i = 0; i < 8; i++) {
+              const err = sampleX(t) - x;
+              if (Math.abs(err) < 1e-6) break;
+              const d = sampleDX(t);
+              if (Math.abs(d) < 1e-6) break;
+              t = Math.min(1, Math.max(0, t - err / d));
+            }
+            return sampleY(t);
+          };
+        })(0.42, 0, 0.58, 1);
+
+        const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+        let reducedMotion = reducedMotionQuery.matches;
+        reducedMotionQuery.addEventListener("change", (ev) => {
+          reducedMotion = ev.matches;
+        });
+
+        let layout = {
+          isPortrait: false,
+          u: 1,
+          stageW: 1440,
+          stageH: 900,
+          R: 430,
+          big: 470,
+          small: 292,
+          bowlY: 418,
+          cx: 720,
+          cy: -12,
+          D: 974,
+          shadowD: 1010,
+          copyTop: 455,
+          titleTop: 632,
+        };
+
+        let coupes = [];
+        let propEls = {};
+
+        let step = 0;
+        let currentP = 0;
+        let phaseStart = 0;
+        let lastFrameTime = 0;
+        let lastRenderedNameIdx = -1;
+        let manualAnim = null;
+
+        let openDrawerName = null;
+        let activeDossierIndex = 0;
+        let selectedFormatId = "pint";
+        let dossierQty = 1;
+        let cart = [];
+        let checkoutMode = false;
+        let confirmedOrder = null;
+        let toastTimer = null;
+
+        function buildStageElements() {
+          const frag = document.createDocumentFragment();
+
+          coupes = FLAVOURS.map((flavour, i) => {
+            const shadow = document.createElement("div");
+            shadow.className = "coupe-shadow";
+
+            const img = document.createElement("img");
+            img.className = "coupe";
+            img.crossOrigin = "anonymous";
+            img.src = flavour.url;
+            img.alt = "";
+            img.draggable = false;
+            img.dataset.index = String(i);
+            img.addEventListener("click", () => handleBowlClick(i));
+
+            frag.appendChild(shadow);
+            frag.appendChild(img);
+            return { img, shadow };
+          });
+
+          Object.keys(PROP_BOXES).forEach((key) => {
+            const div = document.createElement("div");
+            div.className = "prop";
+            div.style.backgroundImage = `url("${PROPS_URL}")`;
+            propEls[key] = div;
+            frag.appendChild(div);
+          });
+
+          stageEl.insertBefore(frag, eyebrowEl);
+        }
+
+        function computeLayout() {
+          const W = window.innerWidth;
+          const H = window.innerHeight;
+          const isPortrait = W / H < 0.9;
+
+          document.body.classList.toggle("portrait", isPortrait);
+
+          let u;
+          let stageW;
+          let stageH;
+          let R;
+          let big;
+          let small;
+          let bowlY;
+          let copyTop;
+          let titleTop;
+
+          if (isPortrait) {
+            u = Math.min(W / 390, H / 760);
+            stageW = 390;
+            stageH = H / u;
+            R = 222;
+            big = 262;
+            small = 158;
+            const stackH = big + 22 + 138 + 20 + 50;
+            const top = 82;
+            const avail = stageH - 70 - top;
+            bowlY = top + Math.max(0, (avail - stackH) * 0.45) + big / 2;
+            copyTop = bowlY + big / 2 + 22;
+            titleTop = copyTop + 158;
+            document.documentElement.style.setProperty("--hs", stageH.toFixed(4));
+          } else {
+            u = H < 560 ? Math.min(W / 1440, H / 770) : Math.min(W / 1440, H / 900);
+            stageW = 1440;
+            stageH = 900;
+            R = 430;
+            big = 470;
+            small = 292;
+            bowlY = 418;
+            copyTop = 455;
+            titleTop = 632;
+            document.documentElement.style.setProperty("--hs", "900");
+          }
+
+          document.documentElement.style.setProperty("--u", `${u}px`);
+
+          const cx = stageW / 2;
+          const cy = bowlY - R;
+          const D = (2 * R) / BAND;
+          const shadowD = D + 36;
+
+          layout = {
+            isPortrait,
+            u,
+            stageW,
+            stageH,
+            R,
+            big,
+            small,
+            bowlY,
+            cx,
+            cy,
+            D,
+            shadowD,
+            copyTop,
+            titleTop,
+          };
+
+          const k = D / (2 * RING_OUTER);
+          const ri = (D / 2) * (RING_INNER / RING_OUTER) * u;
+          const ro = (D / 2) * u;
+
+          ringEl.style.width = `${D * u}px`;
+          ringEl.style.height = `${D * u}px`;
+          ringEl.style.backgroundImage = `url("${RING_URL}")`;
+          ringEl.style.backgroundSize = `${1024 * k * u}px ${1024 * k * u}px`;
+          ringEl.style.backgroundPosition = `${(D / 2 - RING_CX_IMG * k) * u}px ${(D / 2 - RING_CY_IMG * k) * u}px`;
+
+          const maskVal = `radial-gradient(circle closest-side, transparent ${(ri - 1).toFixed(2)}px, #000 ${(ri + 0.5).toFixed(2)}px, #000 ${(ro - 1.5).toFixed(2)}px, transparent ${ro.toFixed(2)}px)`;
+          ringEl.style.maskImage = maskVal;
+          ringEl.style.webkitMaskImage = maskVal;
+
+          ringShadowEl.style.width = `${shadowD * u}px`;
+          ringShadowEl.style.height = `${shadowD * u}px`;
+          ringShadowEl.style.transform = `translate(${(cx - shadowD / 2) * u}px, ${(cy - shadowD / 2 + 10) * u}px)`;
+          ringShadowEl.style.background = `radial-gradient(circle closest-side, transparent ${Math.max(0, ri - 10 * u).toFixed(2)}px, rgba(25,12,45,.16) ${(ri + 6 * u).toFixed(2)}px, rgba(25,12,45,.16) ${(ro - 4 * u).toFixed(2)}px, transparent ${(ro + 14 * u).toFixed(2)}px)`;
+
+          const coupeSizePx = (big / COUPE_FILL) * u;
+          const shadowSizePx = 1.12 * big * u;
+          coupes.forEach(({ img, shadow }) => {
+            img.style.width = `${coupeSizePx}px`;
+            img.style.height = `${coupeSizePx}px`;
+            shadow.style.width = `${shadowSizePx}px`;
+            shadow.style.height = `${shadowSizePx}px`;
+          });
+
+          if (isPortrait) {
+            eyebrowEl.style.top = `${copyTop * u}px`;
+            flavourEl.style.top = `${(copyTop + 30) * u}px`;
+            buyBtn.style.top = `${(copyTop + 92) * u}px`;
+            specTeaserEl.style.top = `${(copyTop + 93) * u}px`;
+            titleEl.style.top = `${titleTop * u}px`;
+          } else {
+            eyebrowEl.style.top = "";
+            flavourEl.style.top = "";
+            buyBtn.style.top = "";
+            specTeaserEl.style.top = "";
+            titleEl.style.top = "";
+          }
+
+          const c = bowlY;
+          const t = Math.max(titleTop, stageH - 170);
+          const placements = isPortrait
+            ? {
+                cone: [-50, c + 150, 104, -14],
+                rasp: [-26, c + 250, 70, 0],
+                blue: [312, c + 170, 96, 0],
+                spoonL: [-44, t + 62, 150, 0],
+                spoonR: [284, t + 62, 150, 0],
+              }
+            : {
+                cone: [-34, 168, 190, -14],
+                rasp: [34, 340, 118, 0],
+                blue: [1238, 360, 168, 0],
+                spoonL: [86, 760, 210, 0],
+                spoonR: [1146, 760, 210, 0],
+              };
+
+          Object.keys(placements).forEach((key) => {
+            const [x, y, w, rot] = placements[key];
+            const [boxX, boxY, boxW, boxH] = PROP_BOXES[key];
+            const s = w / boxW;
+            const el = propEls[key];
+            el.style.width = `${w * u}px`;
+            el.style.height = `${boxH * s * u}px`;
+            el.style.backgroundSize = `${1024 * s * u}px ${688 * s * u}px`;
+            el.style.backgroundPosition = `${-boxX * s * u}px ${-boxY * s * u}px`;
+            el.style.transform = `translate(${x * u}px, ${y * u}px) rotate(${rot}deg)`;
+          });
+
+          const targetW = (isPortrait ? 350 : 1062) * u;
+          titleEl.style.fontSize = "100px";
+          const measuredW = titleEl.getBoundingClientRect().width;
+          if (measuredW > 0) {
+            titleEl.style.fontSize = `${(100 * targetW) / measuredW}px`;
+          }
+
+          renderFrame(currentP, step, (step + 1) % 5, 0);
+        }
+
+        function updateFlavourCopy(idx) {
+          if (lastRenderedNameIdx === idx) return;
+          lastRenderedNameIdx = idx;
+          const f = FLAVOURS[idx];
+          const pint = f.formats.find((fmt) => fmt.id === "pint") || f.formats[0];
+          flavourEl.innerHTML = f.name;
+          heroPriceEl.textContent = `$${pint.price.toFixed(2)}`;
+          heroUnitEl.textContent = "500 ML PINT";
+          heroMetaEl.textContent = f.heroMeta;
+        }
+
+        function renderFrame(p, fromIdx, toIdx, easedT) {
+          const { u, R, big, small, cx, cy, D } = layout;
+
+          const bgStr = lerpColor(FLAVOUR_RGB[fromIdx].bg, FLAVOUR_RGB[toIdx].bg, easedT);
+          const inkStr = lerpColor(FLAVOUR_RGB[fromIdx].ink, FLAVOUR_RGB[toIdx].ink, easedT);
+          document.body.style.background = bgStr;
+          document.documentElement.style.setProperty("--bg", bgStr);
+          document.documentElement.style.setProperty("--ink", inkStr);
+
+          let textOpacity;
+          let textShiftU;
+          if (easedT < 0.5) {
+            updateFlavourCopy(fromIdx);
+            textOpacity = 1 - 2 * easedT;
+            textShiftU = -2 * easedT * 8;
+          } else {
+            updateFlavourCopy(toIdx);
+            textOpacity = 1 - 2 * (1 - easedT);
+            textShiftU = 2 * (1 - easedT) * 8;
+          }
+          const shiftPx = textShiftU * u;
+          flavourEl.style.opacity = textOpacity.toFixed(4);
+          flavourEl.style.transform = `translateY(${shiftPx.toFixed(2)}px)`;
+          specTeaserEl.style.opacity = textOpacity.toFixed(4);
+          specTeaserEl.style.transform = `translateY(${shiftPx.toFixed(2)}px)`;
+
+          ringEl.style.transform = `translate(${((cx - D / 2) * u).toFixed(2)}px, ${((cy - D / 2) * u).toFixed(2)}px) rotate(${(p * STEP_DEG).toFixed(3)}deg)`;
+
+          const coupeSize = big / COUPE_FILL;
+          const shadowSize = 1.12 * big;
+          const ratio = small / big;
+
+          for (let i = 0; i < 5; i++) {
+            let diff = (((i - p) % 5) + 5) % 5;
+            if (diff >= 2.5) diff -= 5;
+
+            const angleDeg = 90 - diff * STEP_DEG;
+            const angleRad = (angleDeg * Math.PI) / 180;
+            const x = cx + R * Math.cos(angleRad);
+            const y = cy + R * Math.sin(angleRad);
+
+            const ad = Math.abs(diff);
+            const scale = ad <= 1 ? 1 + (ratio - 1) * ad : ratio - (ad - 1) * 0.08;
+            const rotation = (p - i) * STEP_DEG;
+            const z = 4 + Math.round(100 - ad * 20);
+
+            const { img, shadow } = coupes[i];
+            img.style.zIndex = String(z);
+            img.style.transform = `translate(${((x - coupeSize / 2) * u).toFixed(2)}px, ${((y - coupeSize / 2) * u).toFixed(2)}px) scale(${scale.toFixed(4)}) rotate(${rotation.toFixed(3)}deg)`;
+
+            const shadowOffsetY = 0.05 * big * scale;
+            shadow.style.zIndex = String(z - 1);
+            shadow.style.transform = `translate(${((x - shadowSize / 2) * u).toFixed(2)}px, ${((y - shadowSize / 2 + shadowOffsetY) * u).toFixed(2)}px) scale(${scale.toFixed(4)})`;
+          }
+        }
+
+        function tick(now) {
+          requestAnimationFrame(tick);
+
+          if (!lastFrameTime) {
+            lastFrameTime = now;
+            phaseStart = now;
+          }
+
+          const dt = now - lastFrameTime;
+          lastFrameTime = now;
+
+          if (dt > 250) {
+            phaseStart += dt;
+            if (manualAnim) manualAnim.startTime += dt;
+          }
+
+          if (manualAnim) {
+            const raw = manualAnim.duration <= 1 ? 1 : Math.min(1, (now - manualAnim.startTime) / manualAnim.duration);
+            const eased = raw >= 1 ? 1 : easeInOut(raw);
+            currentP = manualAnim.fromStep + manualAnim.delta * eased;
+            renderFrame(currentP, manualAnim.fromStep, manualAnim.toStep, eased);
+            if (raw >= 1) {
+              step = manualAnim.toStep;
+              currentP = step;
+              manualAnim = null;
+              phaseStart = now;
+            }
+            return;
+          }
+
+          if (openDrawerName !== null) {
+            phaseStart = now;
+            return;
+          }
+
+          const HOLD = reducedMotion ? 3000 : 1400;
+          const TURN = reducedMotion ? 1 : 500;
+          const e = now - phaseStart;
+
+          if (e < HOLD) {
+            currentP = step;
+            renderFrame(currentP, step, (step + 1) % 5, 0);
+          } else if (e < HOLD + TURN) {
+            const raw = (e - HOLD) / TURN;
+            const eased = reducedMotion ? 1 : easeInOut(raw);
+            currentP = step + eased;
+            renderFrame(currentP, step, (step + 1) % 5, eased);
+          } else {
+            step = (step + 1) % 5;
+            phaseStart += HOLD + TURN;
+            if (now - phaseStart > HOLD + TURN) {
+              phaseStart = now;
+            }
+            currentP = step;
+            renderFrame(currentP, step, (step + 1) % 5, 0);
+          }
+        }
+
+        function rotateToFlavour(targetIdx) {
+          const currentActive = manualAnim ? manualAnim.toStep : step;
+          if (targetIdx === currentActive) return;
+          let delta = (((targetIdx - currentActive) % 5) + 5) % 5;
+          if (delta >= 2.5) delta -= 5;
+          manualAnim = {
+            fromStep: currentActive,
+            toStep: targetIdx,
+            delta,
+            startTime: performance.now(),
+            duration: reducedMotion ? 1 : 500,
+          };
+        }
+
+        function handleBowlClick(idx) {
+          const active = manualAnim ? manualAnim.toStep : step;
+          if (idx === active) {
+            openDossier(idx);
+          } else {
+            rotateToFlavour(idx);
+          }
+        }
+
+        function showToast(msg) {
+          toastEl.textContent = msg;
+          toastEl.classList.add("show");
+          if (toastTimer) clearTimeout(toastTimer);
+          toastTimer = setTimeout(() => {
+            toastEl.classList.remove("show");
+          }, 2400);
+        }
+
+        function closeAllDrawers() {
+          openDrawerName = null;
+          backdropEl.classList.remove("open");
+          backdropEl.setAttribute("aria-hidden", "true");
+          [dossierDrawer, menuDrawer, cartDrawer].forEach((d) => {
+            d.classList.remove("open");
+            d.setAttribute("aria-hidden", "true");
+          });
+          phaseStart = performance.now();
+        }
+
+        function openDrawer(name) {
+          openDrawerName = name;
+          backdropEl.classList.add("open");
+          backdropEl.setAttribute("aria-hidden", "false");
+          const map = {
+            dossier: dossierDrawer,
+            menu: menuDrawer,
+            cart: cartDrawer,
+          };
+          Object.keys(map).forEach((k) => {
+            const active = k === name;
+            map[k].classList.toggle("open", active);
+            map[k].setAttribute("aria-hidden", active ? "false" : "true");
+          });
+        }
+
+        function openDossier(index) {
+          activeDossierIndex = index;
+          selectedFormatId = "pint";
+          dossierQty = 1;
+          rotateToFlavour(index);
+          renderDossier();
+          openDrawer("dossier");
+          dossierBody.scrollTop = 0;
+        }
+
+        function renderDossier() {
+          const f = FLAVOURS[activeDossierIndex];
+          const activeFormat = f.formats.find((fmt) => fmt.id === selectedFormatId) || f.formats[1];
+          const lineTotal = (activeFormat.price * dossierQty).toFixed(2);
+
+          const tabsHtml = FLAVOURS.map(
+            (fl, idx) =>
+              `<button type="button" class="flavour-tab ${idx === activeDossierIndex ? "active" : ""}" data-tab-idx="${idx}">${fl.shortTab}</button>`
+          ).join("");
+
+          const formatsHtml = f.formats
+            .map(
+              (fmt) => `
+              <button type="button" class="format-btn ${fmt.id === selectedFormatId ? "selected" : ""}" data-fmt="${fmt.id}">
+                <span class="format-title">${fmt.label}</span>
+                <span class="format-sub">${fmt.size}</span>
+                <span class="format-price">$${fmt.price.toFixed(2)}</span>
+              </button>`
+            )
+            .join("");
+
+          const scoopsHtml = f.scoops
+            .map(
+              (s, idx) => `
+              <li>
+                <span class="scoop-num">0${idx + 1}</span>
+                <span>${s}</span>
+              </li>`
+            )
+            .join("");
+
+          const specsHtml = f.specs
+            .map(
+              (sp) => `
+              <div class="spec-cell">
+                <span class="spec-k">${sp.k}</span>
+                <span class="spec-v">${sp.v}</span>
+              </div>`
+            )
+            .join("");
+
+          const recipeHtml = f.recipe
+            .map(
+              (st, idx) => `
+              <li class="recipe-step">
+                <span class="step-index">0${idx + 1}.</span>
+                <div>
+                  <h4 class="step-title">${st.title}</h4>
+                  <p class="step-desc">${st.desc}</p>
+                </div>
+              </li>`
+            )
+            .join("");
+
+          dossierBody.innerHTML = `
+            <div class="flavour-tabs" role="tablist" aria-label="Switch gelato flavour">
+              ${tabsHtml}
+            </div>
+
+            <div class="dossier-top">
+              <div class="dossier-bowl-wrap" style="background: ${f.bg};">
+                <img src="${f.url}" alt="${f.plainName} gelato coupe" crossOrigin="anonymous" />
+              </div>
+              <div>
+                <div class="dossier-origin">${f.origin}</div>
+                <h2 class="dossier-name" id="dossierTitle">${f.plainName}</h2>
+                <p class="dossier-tagline">${f.tagline}</p>
+                <div class="dossier-price-line">
+                  <span class="dossier-price-big">$${activeFormat.price.toFixed(2)}</span>
+                  <span class="dossier-price-note">${activeFormat.label} · ${activeFormat.size}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="format-group">
+              <span class="section-label">Select Size &amp; Price</span>
+              <div class="format-grid">${formatsHtml}</div>
+            </div>
+
+            <div class="purchase-row">
+              <div class="qty-stepper" aria-label="Quantity">
+                <button type="button" class="qty-btn" id="dosQtyMinus" aria-label="Decrease quantity">−</button>
+                <span class="qty-val" id="dosQtyVal">${dossierQty}</span>
+                <button type="button" class="qty-btn" id="dosQtyPlus" aria-label="Increase quantity">+</button>
+              </div>
+              <button type="button" class="primary-cta" id="dosAddBtn">
+                Add to Bag · $${lineTotal}
+              </button>
+            </div>
+
+            <section class="dossier-section">
+              <h3>Scoops &amp; Ingredients</h3>
+              <ul class="scoops-list">${scoopsHtml}</ul>
+              <span class="section-label">Full Contents</span>
+              <p class="ingredients-prose">${f.ingredients}</p>
+              <p class="dietary-line">${f.dietary}</p>
+              <p class="vessel-note">${f.vessel}</p>
+            </section>
+
+            <section class="dossier-section">
+              <h3>Technical Specifications</h3>
+              <div class="specs-grid">${specsHtml}</div>
+            </section>
+
+            <section class="dossier-section">
+              <h3>Artisan Recipe &amp; Craft Method</h3>
+              <ol class="recipe-steps">${recipeHtml}</ol>
+            </section>
+          `;
+
+          dossierBody.querySelectorAll("[data-tab-idx]").forEach((btn) => {
+            btn.addEventListener("click", () => {
+              const idx = Number(btn.dataset.tabIdx);
+              activeDossierIndex = idx;
+              dossierQty = 1;
+              rotateToFlavour(idx);
+              renderDossier();
+            });
+          });
+
+          dossierBody.querySelectorAll("[data-fmt]").forEach((btn) => {
+            btn.addEventListener("click", () => {
+              selectedFormatId = btn.dataset.fmt;
+              renderDossier();
+            });
+          });
+
+          dossierBody.querySelector("#dosQtyMinus").addEventListener("click", () => {
+            if (dossierQty > 1) {
+              dossierQty -= 1;
+              renderDossier();
+            }
+          });
+
+          dossierBody.querySelector("#dosQtyPlus").addEventListener("click", () => {
+            if (dossierQty < 12) {
+              dossierQty += 1;
+              renderDossier();
+            }
+          });
+
+          dossierBody.querySelector("#dosAddBtn").addEventListener("click", () => {
+            addToCart(activeDossierIndex, selectedFormatId, dossierQty);
+            showToast(`Added ${dossierQty} × ${f.plainName} (${activeFormat.label})`);
+          });
+        }
+
+        function renderMenu() {
+          const rowsHtml = FLAVOURS.map((f, idx) => {
+            const pint = f.formats[1];
+            const coupe = f.formats[0];
+            return `
+              <article class="catalog-row">
+                <div class="catalog-thumb" style="background: ${f.bg};">
+                  <img src="${f.url}" alt="${f.plainName}" crossOrigin="anonymous" />
+                </div>
+                <div>
+                  <h3 class="catalog-name">${f.plainName}</h3>
+                  <p class="catalog-desc">${f.tagline}</p>
+                  <div class="catalog-meta">Coupe $${coupe.price.toFixed(2)} · Pint $${pint.price.toFixed(2)} · ${f.heroMeta}</div>
+                </div>
+                <div class="catalog-actions">
+                  <span class="catalog-price">$${pint.price.toFixed(2)}</span>
+                  <div class="catalog-btns">
+                    <button type="button" class="btn-outline-sm" data-menu-inspect="${idx}">Recipe &amp; Specs</button>
+                    <button type="button" class="btn-solid-sm" data-menu-add="${idx}">+ Pint</button>
+                  </div>
+                </div>
+              </article>
+            `;
+          }).join("");
+
+          const compareRows = FLAVOURS.map((f) => {
+            const pint = f.formats[1];
+            return `
+              <tr>
+                <td>${f.plainName}</td>
+                <td>$${pint.price.toFixed(2)}</td>
+                <td>${f.specs[1].v.split(" ")[0]}</td>
+                <td>${f.specs[2].v.split(" ")[0]}</td>
+                <td>${f.specs[4].v.split("·")[0].trim()}</td>
+                <td>${f.specs[3].v.split(" ")[0]} °C</td>
+              </tr>
+            `;
+          }).join("");
+
+          menuBody.innerHTML = `
+            <p class="menu-intro">
+              Every Gelato Lab batch is formulated with its own sugar-to-solid balance, churn overrun, botanical or nut infusion, and distinct pricing based on single-origin ingredients.
+            </p>
+            <div class="catalog-list">${rowsHtml}</div>
+            <div class="compare-wrap">
+              <span class="section-label">Side-by-Side Pint Specifications</span>
+              <table class="compare-table">
+                <thead>
+                  <tr>
+                    <th>Flavour</th>
+                    <th>Pint Price</th>
+                    <th>Fat</th>
+                    <th>Overrun</th>
+                    <th>Energy / 100g</th>
+                    <th>Serve</th>
+                  </tr>
+                </thead>
+                <tbody>${compareRows}</tbody>
+              </table>
+            </div>
+          `;
+
+          menuBody.querySelectorAll("[data-menu-inspect]").forEach((btn) => {
+            btn.addEventListener("click", () => {
+              openDossier(Number(btn.dataset.menuInspect));
+            });
+          });
+
+          menuBody.querySelectorAll("[data-menu-add]").forEach((btn) => {
+            btn.addEventListener("click", () => {
+              const idx = Number(btn.dataset.menuAdd);
+              addToCart(idx, "pint", 1);
+              showToast(`Added ${FLAVOURS[idx].plainName} (Artisan Pint)`);
+            });
+          });
+        }
+
+        function addToCart(flavourIndex, formatId, qty) {
+          const key = `${flavourIndex}:${formatId}`;
+          const existing = cart.find((item) => item.key === key);
+          if (existing) {
+            existing.qty += qty;
+          } else {
+            cart.push({ key, flavourIndex, formatId, qty });
+          }
+          confirmedOrder = null;
+          updateCartBadge();
+        }
+
+        function updateCartBadge() {
+          const total = cart.reduce((acc, item) => acc + item.qty, 0);
+          cartCountEl.textContent = String(total);
+          cartCountEl.classList.toggle("has-items", total > 0);
+        }
+
+        function getCartTotals() {
+          let subtotal = 0;
+          cart.forEach((item) => {
+            const f = FLAVOURS[item.flavourIndex];
+            const fmt = f.formats.find((x) => x.id === item.formatId) || f.formats[1];
+            subtotal += fmt.price * item.qty;
+          });
+          const shipping = subtotal === 0 ? 0 : subtotal >= 45 ? 0 : 8.5;
+          return { subtotal, shipping, total: subtotal + shipping };
+        }
+
+        function renderCart() {
+          if (confirmedOrder) {
+            cartBody.innerHTML = `
+              <div class="order-confirmed">
+                <span class="section-label">Dry-Ice Dispatch Confirmed</span>
+                <h3>Order #${confirmedOrder.orderId} Confirmed</h3>
+                <p>
+                  Thank you, <strong>${confirmedOrder.name}</strong>. Your artisan gelato selection is scheduled for insulated delivery to <strong>${confirmedOrder.address}</strong> (${confirmedOrder.window}).
+                </p>
+                <div class="summary-lines">
+                  <div class="summary-row"><span>Items Packed</span><span>${confirmedOrder.itemCount} items</span></div>
+                  <div class="summary-row"><span>Insulated Dry-Ice Courier</span><span>${confirmedOrder.shipping === 0 ? "Complimentary" : "$" + confirmedOrder.shipping.toFixed(2)}</span></div>
+                  <div class="summary-total"><span>Total Charged</span><span>$${confirmedOrder.total.toFixed(2)}</span></div>
+                </div>
+              </div>
+            `;
+            cartFooter.innerHTML = `
+              <button type="button" class="primary-cta" style="width:100%" id="continueExploreBtn">
+                Return to Gelato Lab
+              </button>
+            `;
+            cartFooter.querySelector("#continueExploreBtn").addEventListener("click", () => {
+              confirmedOrder = null;
+              closeAllDrawers();
+            });
+            return;
+          }
+
+          if (cart.length === 0) {
+            cartBody.innerHTML = `
+              <div class="cart-empty">
+                <h3>Your insulated bag is empty</h3>
+                <p>Explore our five small-batch flavours, inspect each recipe and specification, and build your tasting order.</p>
+                <button type="button" class="primary-cta" id="browseMenuFromCart">Browse All 5 Flavours</button>
+              </div>
+            `;
+            cartFooter.innerHTML = "";
+            cartBody.querySelector("#browseMenuFromCart").addEventListener("click", () => {
+              renderMenu();
+              openDrawer("menu");
+            });
+            return;
+          }
+
+          const { subtotal, shipping, total } = getCartTotals();
+          const remainingForFree = Math.max(0, 45 - subtotal);
+
+          const itemsHtml = cart
+            .map((item) => {
+              const f = FLAVOURS[item.flavourIndex];
+              const fmt = f.formats.find((x) => x.id === item.formatId) || f.formats[1];
+              const line = (fmt.price * item.qty).toFixed(2);
+              return `
+                <div class="cart-item">
+                  <div class="cart-item-img" style="background:${f.bg};">
+                    <img src="${f.url}" alt="${f.plainName}" crossOrigin="anonymous" />
+                  </div>
+                  <div>
+                    <h4 class="cart-item-title">${f.plainName}</h4>
+                    <p class="cart-item-sub">${fmt.label} · ${fmt.size} · $${fmt.price.toFixed(2)} each</p>
+                    <div class="cart-item-controls">
+                      <div class="mini-stepper">
+                        <button type="button" data-dec="${item.key}" aria-label="Decrease quantity">−</button>
+                        <span>${item.qty}</span>
+                        <button type="button" data-inc="${item.key}" aria-label="Increase quantity">+</button>
+                      </div>
+                      <button type="button" class="remove-link" data-rem="${item.key}">Remove</button>
+                    </div>
+                  </div>
+                  <div class="cart-item-price">$${line}</div>
+                </div>
+              `;
+            })
+            .join("");
+
+          const checkoutHtml = checkoutMode
+            ? `
+              <form class="checkout-form" id="checkoutForm">
+                <div class="field">
+                  <label for="custName">Full Name</label>
+                  <input id="custName" name="name" type="text" required placeholder="Elena Rossi" />
+                </div>
+                <div class="field">
+                  <label for="custAddress">Delivery Address</label>
+                  <input id="custAddress" name="address" type="text" required placeholder="42 Via Brera, Suite 4" />
+                </div>
+                <div class="field">
+                  <label for="custWindow">Insulated Delivery Window</label>
+                  <select id="custWindow" name="window">
+                    <option value="Today · 17:00 – 19:00">Today · 17:00 – 19:00</option>
+                    <option value="Tomorrow · 11:00 – 13:00">Tomorrow · 11:00 – 13:00</option>
+                    <option value="Tomorrow · 18:00 – 20:00">Tomorrow · 18:00 – 20:00</option>
+                  </select>
+                </div>
+              </form>
+            `
+            : "";
+
+          cartBody.innerHTML = `
+            <p class="menu-intro" style="margin-bottom:14px;">
+              ${
+                remainingForFree > 0
+                  ? `Add $${remainingForFree.toFixed(2)} more for complimentary dry-ice courier delivery.`
+                  : "Complimentary dry-ice courier delivery unlocked on your order."
+              }
+            </p>
+            <div class="cart-items">${itemsHtml}</div>
+            ${checkoutHtml}
+          `;
+
+          cartFooter.innerHTML = `
+            <div class="summary-lines">
+              <div class="summary-row"><span>Subtotal</span><span>$${subtotal.toFixed(2)}</span></div>
+              <div class="summary-row"><span>Dry-Ice Courier</span><span>${shipping === 0 ? "Free" : "$" + shipping.toFixed(2)}</span></div>
+              <div class="summary-total"><span>Total</span><span>$${total.toFixed(2)}</span></div>
+            </div>
+            <button type="button" class="primary-cta" style="width:100%" id="cartActionBtn">
+              ${checkoutMode ? `Place Order · $${total.toFixed(2)}` : "Proceed to Insulated Delivery"}
+            </button>
+          `;
+
+          cartBody.querySelectorAll("[data-dec]").forEach((btn) => {
+            btn.addEventListener("click", () => {
+              const item = cart.find((x) => x.key === btn.dataset.dec);
+              if (!item) return;
+              item.qty -= 1;
+              if (item.qty <= 0) cart = cart.filter((x) => x.key !== item.key);
+              updateCartBadge();
+              renderCart();
+            });
+          });
+
+          cartBody.querySelectorAll("[data-inc]").forEach((btn) => {
+            btn.addEventListener("click", () => {
+              const item = cart.find((x) => x.key === btn.dataset.inc);
+              if (!item) return;
+              item.qty += 1;
+              updateCartBadge();
+              renderCart();
+            });
+          });
+
+          cartBody.querySelectorAll("[data-rem]").forEach((btn) => {
+            btn.addEventListener("click", () => {
+              cart = cart.filter((x) => x.key !== btn.dataset.rem);
+              updateCartBadge();
+              renderCart();
+            });
+          });
+
+          cartFooter.querySelector("#cartActionBtn").addEventListener("click", () => {
+            if (!checkoutMode) {
+              checkoutMode = true;
+              renderCart();
+              cartBody.scrollTop = cartBody.scrollHeight;
+              return;
+            }
+            const form = document.getElementById("checkoutForm");
+            if (form && !form.reportValidity()) return;
+            const nameVal = document.getElementById("custName").value.trim();
+            const addrVal = document.getElementById("custAddress").value.trim();
+            const winVal = document.getElementById("custWindow").value;
+            const itemCount = cart.reduce((acc, i) => acc + i.qty, 0);
+            confirmedOrder = {
+              orderId: `GL-${Math.floor(1000 + Math.random() * 9000)}`,
+              name: nameVal,
+              address: addrVal,
+              window: winVal,
+              itemCount,
+              shipping,
+              total,
+            };
+            cart = [];
+            checkoutMode = false;
+            updateCartBadge();
+            renderCart();
+          });
+        }
+
+        buyBtn.addEventListener("click", () => {
+          const active = manualAnim ? manualAnim.toStep : step;
+          openDossier(active);
+        });
+
+        recipeBtn.addEventListener("click", () => {
+          const active = manualAnim ? manualAnim.toStep : step;
+          openDossier(active);
+        });
+
+        menuBtn.addEventListener("click", () => {
+          renderMenu();
+          openDrawer("menu");
+        });
+
+        cartBtn.addEventListener("click", () => {
+          checkoutMode = false;
+          renderCart();
+          openDrawer("cart");
+        });
+
+        closeDossierBtn.addEventListener("click", closeAllDrawers);
+        closeMenuBtn.addEventListener("click", closeAllDrawers);
+        closeCartBtn.addEventListener("click", closeAllDrawers);
+        backdropEl.addEventListener("click", closeAllDrawers);
+
+        window.addEventListener("keydown", (ev) => {
+          if (ev.key === "Escape" && openDrawerName !== null) {
+            closeAllDrawers();
+          } else if (openDrawerName === null) {
+            if (ev.key === "ArrowRight") {
+              const active = manualAnim ? manualAnim.toStep : step;
+              rotateToFlavour((active + 1) % 5);
+            } else if (ev.key === "ArrowLeft") {
+              const active = manualAnim ? manualAnim.toStep : step;
+              rotateToFlavour((active + 4) % 5);
+            }
+          }
+        });
+
+        window.addEventListener("resize", computeLayout);
+
+        function preloadImage(url) {
+          return new Promise((resolve) => {
+            const img = new Image();
+            img.crossOrigin = "anonymous";
+            img.onload = () => resolve(true);
+            img.onerror = () => resolve(false);
+            img.src = url;
+          });
+        }
+
+        async function init() {
+          const allUrls = [RING_URL, PROPS_URL, ...FLAVOURS.map((f) => f.url)];
+          const assetsPromise = Promise.all([
+            ...allUrls.map(preloadImage),
+            document.fonts ? document.fonts.ready : Promise.resolve(),
+          ]);
+          const timeoutPromise = new Promise((resolve) => setTimeout(resolve, 4500));
+
+          await Promise.race([assetsPromise, timeoutPromise]);
+
+          buildStageElements();
+          computeLayout();
+
+          heroEl.classList.add("ready");
+
+          requestAnimationFrame((now) => {
+            phaseStart = now;
+            lastFrameTime = now;
+            requestAnimationFrame(tick);
+          });
+        }
+
+        init();
+      })();
+    </script>
+  </body>
+</html>
